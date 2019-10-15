@@ -21,14 +21,15 @@ server.listen(100)
 
 clients=[]
 
+
 def clientthread(conn,addr):
     nick=conn.recv(2048).decode('utf-8')
     regex = re.compile('[@!#$%^&*()?/|}{~:]')
     if(regex.search(nick) == None) and len(nick)<=12:
-        conn.sendall('<OK>'.encode('utf-8'))
+        conn.sendall('OK'.encode('utf-8'))
     	
     else:
-        conn.sendall('<ERR>'.encode('utf-8'))
+        conn.sendall('ERROR'.encode('utf-8'))
         clients.remove(conn)
         sys.exit()
 
@@ -38,17 +39,17 @@ def clientthread(conn,addr):
             
             if not message:
             	conn.close()
+                clients.remove(conn)
             	break 
             else:
 
-
             	if len(message)<=256 :
-                	print('<'+nick+'>' + message)
-
-                	message_to_send = message
+                	print(nick+' ' + message)
+                	message_to_send =  message
                 	broadcasting(message_to_send,conn,nick)
             	else:
-                	clients.remove(conn)
+                	conn.sendall('ERROR'.encode('utf-8'))
+
 
         except KeyboardInterrupt: 
             break
@@ -57,23 +58,27 @@ def clientthread(conn,addr):
 
 def broadcasting(message,connection,nick):
     for sockets in clients:
-        if sockets != connection and socket!= server:
+        if sockets != connection and sockets!= server:
             try:
-                sockets.sendall('<'+ nick +'>' + message.encode('utf-8'))
-                    
+                sockets.sendall( nick +''+ message.encode('utf-8'))
             except KeyboardInterrupt:
-                clients.remove(sockets)
-                break 
-
-
+                    clients.remove(sockets)
+                    break 
 while True:
     conn,addr=server.accept()
-    conn.sendall('Hello Version 1'.encode('utf-8'))
+    conn.sendall('Hello 1'.encode('utf-8'))
     clients.append(conn)
+    clients.append(server)
     print(addr[0]+":connected")
-
-
+    
     start_new_thread(clientthread,(conn,addr))
+
+for i in clients:
+    if i ==server:
+        message=sys.stdin.readline()
+        conn.sendall(message.encode('utf-8'))
+
+
 
 conn.close()
 server.close()     

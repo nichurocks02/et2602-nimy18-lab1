@@ -22,12 +22,16 @@ first_msg=server.recv(2048).decode('utf-8')
 
 print(first_msg)
 
-print('NICK '+nick.encode('utf-8'))
+
+
+#print('NICK '+nick.encode('utf-8'))
 
 server.sendall('NICK '+nick.encode('utf-8'))
 
 ok_msg=server.recv(2048).decode('utf-8')
 print(ok_msg)
+
+
 
 while True:
     socket_list=[sys.stdin, server]
@@ -51,7 +55,7 @@ The return value is a tuple of three lists corresponding to the first three argu
             if message == '\n':
                 continue
             else:
-                server.sendall(message.encode('utf-8'))
+                server.sendall('MSG ' + message.encode('utf-8'))
 server.close()
 
 

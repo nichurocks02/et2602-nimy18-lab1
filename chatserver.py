@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import socket
 import sys
 from _thread import *
@@ -20,12 +20,13 @@ server.listen(100)
 
 
 clients=[]
-
+clients.append(server)
 
 def clientthread(conn,addr):
     nick=conn.recv(2048).decode('utf-8')
+    nick1=nick.strip('NICK ')
     regex = re.compile('[@!#$%^&*()?/|}{~:]')
-    if(regex.search(nick) == None) and len(nick)<=12:
+    if(regex.search(nick1) == None) and len(nick1)<=12:
         conn.sendall('OK'.encode('utf-8'))
     	
     else:
@@ -36,31 +37,33 @@ def clientthread(conn,addr):
     while True:
         try:
             message = conn.recv(2048).decode('utf-8')
+            message1=message.strip('MSG')
+
             
-            if not message:
+            if not message1:
             	conn.close()
                 clients.remove(conn)
             	break 
             else:
 
-            	if len(message)<=256 :
-                	print(nick+' ' + message)
-                	message_to_send =  message
-                	broadcasting(message_to_send,conn,nick)
-            	else:
-                	conn.sendall('ERROR'.encode('utf-8'))
+                #a=re.compile('^[\x00-\x80]')
+                if len(message1)<=255:
+                    print('MSG ' + nick1 + message1)
+                    message_to_send = 'MSG ' +''+nick1+'' + message1
+                    broadcasting(message_to_send,conn,nick1)
 
+            	elif len(message1) > 255 :
+                    conn.sendall('ERROR'.encode('utf-8'))
 
         except KeyboardInterrupt: 
-            break
             conn.close()
+            break
 
-
-def broadcasting(message,connection,nick):
+def broadcasting(message,connection,nick1):
     for sockets in clients:
         if sockets != connection and sockets!= server:
             try:
-                sockets.sendall( nick +''+ message.encode('utf-8'))
+                sockets.sendall(message.encode('utf-8'))
             except KeyboardInterrupt:
                     clients.remove(sockets)
                     break 
@@ -68,16 +71,10 @@ while True:
     conn,addr=server.accept()
     conn.sendall('Hello 1'.encode('utf-8'))
     clients.append(conn)
-    clients.append(server)
+    
     print(addr[0]+":connected")
     
     start_new_thread(clientthread,(conn,addr))
-
-for i in clients:
-    if i ==server:
-        message=sys.stdin.readline()
-        conn.sendall(message.encode('utf-8'))
-
 
 
 conn.close()

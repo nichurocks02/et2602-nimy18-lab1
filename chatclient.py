@@ -30,6 +30,13 @@ server.sendall('NICK '+nick.encode('utf-8'))
 
 ok_msg=server.recv(2048).decode('utf-8')
 print(ok_msg)
+if ok_msg == "OK":
+    pass
+elif ok_msg == "ERROR":
+    print('do not enter nick name with special characters')
+    print('sorry you are disconnected')
+    sys.exit()
+    
 
 
 

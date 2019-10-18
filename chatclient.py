@@ -62,7 +62,7 @@ The return value is a tuple of three lists corresponding to the first three argu
             if message == '\n':
                 continue
             else:
-                server.sendall('MSG ' + message.encode('utf-8'))
+                server.sendall(message[:-1].encode('utf-8'))
 server.close()
 
 

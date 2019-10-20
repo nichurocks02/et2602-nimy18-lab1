@@ -7,17 +7,19 @@ import select
 import re 
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+'''creates a socket object with address of IPV4 type and TCP socket'''
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
+'''the above command is used for resuing the address each and every time i 
+restart the program '''
 
 Info = (sys.argv[1])
 a=Info.split(':')
 IP_addr=str(a[0])
 port=int(a[1])
 nick=str(sys.argv[2])
-
+#used to store values from command line
 server.connect((IP_addr, port))
-
+#connects to the server 
 first_msg=server.recv(2048).decode('utf-8')
 
 print(first_msg)
@@ -27,14 +29,14 @@ print(first_msg)
 #print('NICK '+nick.encode('utf-8'))
 
 server.sendall('NICK '+nick.encode('utf-8'))
-
+#senall command sends the info in it as bytes to the server , it sends all the bytes at a time
 ok_msg=server.recv(2048).decode('utf-8')
 print(ok_msg)
 if ok_msg == "OK":
     pass
-elif ok_msg == "ERROR":
-    print('do not enter nick name with special characters')
-    print('you have been assigned an anonymous nick')
+elif ok_msg == "ERR malformed nick name":
+    print('do not enter nick name with special characters,limit to 12 chars')
+    print('you have been assigned an anonymous nick name')
     
     
 
@@ -59,12 +61,13 @@ The return value is a tuple of three lists corresponding to the first three argu
             print(message)
         else:
             message=sys.stdin.readline()
+            #sys.stdin is a system output that represents standard input .readline() is used to readlines from the input
             if message == '\n':
                 continue
             else:
                 server.sendall('MSG '+message.encode('utf-8'))
                 
 server.close()
-
+#above command closes the connection of the socket object
 
 

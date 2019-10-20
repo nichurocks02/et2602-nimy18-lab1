@@ -15,8 +15,9 @@ IP_addr=str(a[0])
 port=int(a[1])
 
 server.bind((IP_addr,port))
-
+'''binds ip and port of the server to enable it for listening and opening port'''
 server.listen(100)
+'''buffer for clients'''
 print('Hello my name is Jarvis, Welcome to the chat server')
 print('Waiting for connections')
 
@@ -32,7 +33,8 @@ def clientthread(conn,addr):
         conn.sendall('OK'.encode('utf-8'))
     	
     else:
-        conn.sendall('ERROR'.encode('utf-8'))
+        conn.sendall('ERR malformed nick name'.encode('utf-8'))
+        
         nick1 = 'anonomous'
         
 
@@ -48,51 +50,31 @@ def clientthread(conn,addr):
             	break 
 
             elif 'MSG ' not in message:
-                conn.sendall('ERROR malformed command'.encode('utf-8'))
+                conn.sendall('ERROR malformed message'.encode('utf-8'))
             else:
 
-                #a=re.compile('^[\x00-\x80]')
+                
                 if len(message1)<=255 :
-                    #global message_to_send
-                    #print(message)
-                    #regex = re.compile('[@_!#$^&*()<>?\/}{~:]')
-                    #if(regex.search(message1) == None):
-                    '''print(len(message))
-                    print('start')
-                    for i in message:
-                        print('|'+i+'|'+str(ord(i))+'|')
-
-                    print('end')
-                    print('MSG ' + nick1 + message)'''
+                    
                     count=0
                     for i in message1[:-1]:
                         if ord(i)<31:
-                            #a = True
+                            
                             count = count +1
                             
                         else:
                             pass
-                            #print(message_to_send)
+                    #logic for checking control        
                     if count != 0:
-                        conn.sendall('ERROR'.encode('utf-8'))
+                        conn.sendall('ERROR -> dont use control characters'.encode('utf-8'))
                     else:
-                        message_to_send = 'MSG'+' ' +nick1+' ' + message1
+                        message_to_send = 'MSG '+nick1+' ' + message1
                 
                         broadcasting(message_to_send,conn,nick1)
                    
-                    #else:
-                        #print('Blah Blash')
-                        #conn.sendall('ERROR'.encode('utf-8'))
-                        #message_to_send = 'MSG1 ' +''+nick1
-                
-                
-
             	elif len(message1) > 255 :
-                    conn.sendall('ERROR'.encode('utf-8'))
-                    #message_to_send= 'MSG '+nick1+''
-                    #print(message_to_send)
-                    #broadcasting(message_to_send,conn,nick1)
-            
+                    conn.sendall('ERROR -> message length exceeding 256 characters'.encode('utf-8'))
+                   
                 
 
         except KeyboardInterrupt:
@@ -107,14 +89,19 @@ def broadcasting(message,connection,nick1):
             except KeyboardInterrupt:
                     clients.remove(sockets)
                     break 
+''' above function is used to broadcast message received from one client
+ to every active client connected to the server except the server itself'''
+
+
 while True:
     conn,addr=server.accept()
+    #accepts incoming connections 
     conn.sendall('Hello 1'.encode('utf-8'))
     clients.append(conn)
     print(addr[0]+" has connected")
     
     start_new_thread(clientthread,(conn,addr))
-
+    #starts a new process for every new client that is connected
 
 conn.close()
 server.close()     

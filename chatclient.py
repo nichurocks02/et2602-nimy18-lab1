@@ -34,8 +34,8 @@ if ok_msg == "OK":
     pass
 elif ok_msg == "ERROR":
     print('do not enter nick name with special characters')
-    print('sorry you are disconnected')
-    sys.exit()
+    print('you have been assigned an anonymous nick')
+    
     
 
 
@@ -62,7 +62,8 @@ The return value is a tuple of three lists corresponding to the first three argu
             if message == '\n':
                 continue
             else:
-                server.sendall(message[:-1].encode('utf-8'))
+                server.sendall('MSG '+message.encode('utf-8'))
+                
 server.close()
 
 

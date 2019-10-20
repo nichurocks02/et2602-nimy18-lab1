@@ -17,6 +17,8 @@ port=int(a[1])
 server.bind((IP_addr,port))
 
 server.listen(100)
+print('Hello my name is Jarvis, Welcome to the chat server')
+print('Waiting for connections')
 
 
 clients=[]
@@ -31,23 +33,26 @@ def clientthread(conn,addr):
     	
     else:
         conn.sendall('ERROR'.encode('utf-8'))
-        
-        clients.remove(conn)
+        nick1 = 'anonomous'
         
 
     while True:
         try:
             message = conn.recv(2048).decode('utf-8')
-            #message1=message.strip('MSG')
+            message1=message.strip('MSG ')
             
             if not message:
             	conn.close()
+                print(addr[0]+" has disconnected")
                 clients.remove(conn)
             	break 
+
+            elif 'MSG ' not in message:
+                conn.sendall('ERROR malformed command'.encode('utf-8'))
             else:
 
                 #a=re.compile('^[\x00-\x80]')
-                if len(message)<=255 :
+                if len(message1)<=255 :
                     #global message_to_send
                     #print(message)
                     #regex = re.compile('[@_!#$^&*()<>?\/}{~:]')
@@ -59,18 +64,22 @@ def clientthread(conn,addr):
 
                     print('end')
                     print('MSG ' + nick1 + message)'''
-                    for i in message:
+                    count=0
+                    for i in message1[:-1]:
                         if ord(i)<31:
-                            a = True
-
+                            #a = True
+                            count = count +1
+                            
                         else:
-                            a =  False
+                            pass
                             #print(message_to_send)
-                    if a == True:
+                    if count != 0:
                         conn.sendall('ERROR'.encode('utf-8'))
                     else:
-                        message_to_send = 'MSG ' +''+nick1+'' + message
+                        message_to_send = 'MSG'+' ' +nick1+' ' + message1
+                
                         broadcasting(message_to_send,conn,nick1)
+                   
                     #else:
                         #print('Blah Blash')
                         #conn.sendall('ERROR'.encode('utf-8'))
@@ -86,13 +95,13 @@ def clientthread(conn,addr):
             
                 
 
-        except KeyboardInterrupt: 
+        except KeyboardInterrupt:
             conn.close()
             break
 
 def broadcasting(message,connection,nick1):
     for sockets in clients:
-        if sockets != connection and sockets!= server:
+        if sockets!= server:
             try:
                 sockets.sendall(message.encode('utf-8'))
             except KeyboardInterrupt:
@@ -102,8 +111,7 @@ while True:
     conn,addr=server.accept()
     conn.sendall('Hello 1'.encode('utf-8'))
     clients.append(conn)
-    
-    print(addr[0]+":connected")
+    print(addr[0]+" has connected")
     
     start_new_thread(clientthread,(conn,addr))
 
